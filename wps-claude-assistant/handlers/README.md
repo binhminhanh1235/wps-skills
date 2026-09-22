@@ -1,3 +1,2 @@
 common-handler.js, excel-handler.js, ppt-handler.js, word-handler.js
-macOS WPS 加载项各应用处理器实现目录。
-一旦这里的结构发生变化，请务必更新我... 就像重新标记领地一样。
+WPS add-on application handlers directory. / Thư mục các bộ xử lý ứng dụng của add-on WPS.

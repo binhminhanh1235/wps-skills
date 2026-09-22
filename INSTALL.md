@@ -1,148 +1,150 @@
-# WPS Skills 安装指南
+# WPS Skills Installation Guide
 
-> **本文件面向 AI 编程助手**（Claude Code、Cursor 等）。读取本文件后，你应能完全理解安装流程并自动执行所有步骤。按顺序执行，不要跳步。
+[English](INSTALL.md) | [Tiếng Việt](INSTALL_vi.md) | [中文](INSTALL_zh.md)
+
+> **This document is intended for AI coding assistants** (Claude Code, Cursor, Codex CLI, etc.). After reading this document, you should fully understand the installation process and automatically execute all steps in sequence without skipping.
 
 ---
 
-## 安装前状态检查
+## Pre-Installation Status Check
 
-在执行安装前，先判断是否已经安装过。依次执行以下检查：
+Before executing the installation, first determine whether it has already been installed. Run the following checks in sequence:
 
 ```bash
-# 1. 检查 MCP Server 是否已注册
+# 1. Check if MCP Server is registered
 claude mcp list 2>/dev/null | grep -i wps
 
-# 2. 检查 Skills 是否已注册
+# 2. Check if Skills are registered
 ls ~/.claude/skills/wps-excel/SKILL.md 2>/dev/null
 
-# 3. 检查编译产物是否存在
+# 3. Check if build artifact exists
 ls wps-office-mcp/dist/index.js 2>/dev/null
 ```
 
-**判断逻辑**：
-- 三项全部存在 → 已安装，无需重复执行。告知用户"WPS Skills 已安装，重启 Claude Code 和 WPS Office 即可使用"
-- 部分存在 → 从缺失的步骤开始补装
-- 全部不存在 → 执行完整安装流程
+**Evaluation Logic**:
+- All 3 items exist → Already installed, no need to reinstall. Inform user: "WPS Skills is already installed. Restart Claude Code and WPS Office to use it."
+- Partially exists → Resume installation from the missing steps.
+- None exists → Execute full installation workflow.
 
 ---
 
-## macOS 安装
+## macOS Installation
 
-### Step 1: 检测前置条件
+### Step 1: Check Prerequisites
 
 ```bash
-# 检测操作系统（必须是 Darwin）
+# Check operating system (must be Darwin)
 uname -s
 
-# 检测 WPS Office 是否已安装
+# Check if WPS Office is installed
 ls /Applications/wpsoffice.app
 
-# 检测 Node.js 版本（必须 >= 18.0.0）
+# Check Node.js version (must be >= 18.0.0)
 node -v
 ```
 
-**如果前置条件不满足**：
-- WPS Office 不存在 → 告知用户安装：https://www.wps.cn/product/wpsmac
-- Node.js 不存在或版本 < 18 → 告知用户安装：https://nodejs.org/
-- 前置条件不满足时，停止安装流程，不要继续
+**If prerequisites are not met**:
+- WPS Office not found → Ask user to install: https://www.wps.com/
+- Node.js not found or version < 18 → Ask user to install: https://nodejs.org/
+- Stop installation immediately if prerequisites are not met.
 
-### Step 2: 运行一键安装脚本
+### Step 2: Run One-Click Installation Script
 
 ```bash
-# 进入项目根目录（即包含本文件的目录）
-cd <项目根目录>
+# Enter project root directory
+cd <PROJECT_ROOT>
 
-# 赋予执行权限并运行
+# Grant execute permissions and run
 chmod +x scripts/auto-install-mac.sh
 ./scripts/auto-install-mac.sh
 ```
 
-脚本自动完成以下全部操作：
-- 二次检测前置条件（macOS、WPS Office、Node.js 18+）
-- 创建 WPS 加载项目录（如不存在）
-- 安装加载项文件到 `~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/claude-assistant_/`（目录名尾部 `_` 是必须的）
-- 更新 publish.xml 注册加载项
-- 执行 `npm install` 安装依赖
-- 执行 `npm run build` 编译 TypeScript
-- 执行 `claude mcp add wps-office` 注册 MCP Server
-- 创建软链接注册 Skills 到 `~/.claude/skills/`
+The script automatically performs all of the following operations:
+- Double-checks prerequisites (macOS, WPS Office, Node.js 18+)
+- Creates WPS add-on directory if it does not exist
+- Installs add-on files to `~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/claude-assistant_/` (trailing `_` in directory name is mandatory)
+- Updates publish.xml to register the add-on
+- Runs `npm install` to install dependencies
+- Runs `npm run build` to compile TypeScript
+- Runs `claude mcp add wps-office` to register MCP Server
+- Creates symlinks to register Skills in `~/.claude/skills/`
 
-### Step 3: 安装后验证
+### Step 3: Post-Installation Verification
 
-逐项执行以下检查，全部通过才算安装成功：
+Run the following checks; all must pass for installation to be successful:
 
 ```bash
-# 1. MCP Server 已注册（输出应包含 wps-office）
+# 1. MCP Server registered (output should contain wps-office)
 claude mcp list
 
-# 2. Skills 已注册（应列出 wps-excel, wps-word, wps-ppt, wps-office 四个目录/链接）
+# 2. Skills registered (should list wps-excel, wps-word, wps-ppt, wps-office)
 ls ~/.claude/skills/
 
-# 3. 编译产物存在
+# 3. Build artifact exists
 ls wps-office-mcp/dist/index.js
 
-# 4. WPS 加载项已安装（目录名以 _ 结尾）
+# 4. WPS add-on installed (directory name ends with _)
 ls ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/claude-assistant_/
 
-# 5. publish.xml 已注册加载项（输出应包含 claude-assistant）
+# 5. publish.xml registered (output should contain claude-assistant)
 grep "claude-assistant" ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/publish.xml
 ```
 
-### Step 4: 告知用户
+### Step 4: Inform User
 
-安装完成后，必须告知用户执行以下操作：
-1. **重启 Claude Code**（必须！Skills 只在启动时加载）
-2. 重启 WPS Office
-3. 打开任意 Excel/Word/PPT 文档
-4. 在 WPS 顶部查看 "Claude助手" 选项卡，确认状态显示 "轮询中"
+After installation completes, you must inform the user to:
+1. **Restart Claude Code** (Mandatory! Skills are only loaded on startup)
+2. Restart WPS Office
+3. Open any Excel/Word/PPT document
+4. Check the "Claude Assistant" tab in WPS Office toolbar and verify status shows "Polling"
 
-### ⚠️ 已知问题
+### ⚠️ Known Issues
 
-**macOS 沙盒目录访问权限弹窗**
-- 现象：首次执行验证命令访问 `~/Library/Containers/com.kingsoft.wpsoffice.mac/...` 时，macOS 会弹出文件访问权限请求
-- 处理：点击「允许」即可，之后不再弹出
-- 影响：不影响安装结果，属正常 macOS 沙盒机制
+**macOS Sandbox Directory Permission Dialog**
+- Symptom: When running verification accessing `~/Library/Containers/com.kingsoft.wpsoffice.mac/...` for the first time, macOS will prompt for file access permission.
+- Action: Simply click "Allow". It will not prompt again.
+- Impact: Normal macOS sandbox mechanism, does not affect installation.
 
 ---
 
-## Linux 安装
+## Linux Installation
 
-### Step 1: 检测前置条件
+### Step 1: Check Prerequisites
 
 ```bash
-# 检测操作系统（必须是 Linux）
+# Check operating system (must be Linux)
 uname -s
 
-# 检测 WPS Office 是否已安装
+# Check if WPS Office is installed
 which wps || ls /opt/kingsoft/wps-office
 
-# 检测 Node.js 版本（必须 >= 18.0.0）
+# Check Node.js version (must be >= 18.0.0)
 node -v
 ```
 
-**如果前置条件不满足**：
-- WPS Office 不存在 -> 告知用户安装：https://linux.wps.cn
-- Node.js 不存在或版本 < 18 -> 告知用户安装：https://nodejs.org/
+**If prerequisites are not met**:
+- WPS Office not found -> Ask user to install: https://linux.wps.com
+- Node.js not found or version < 18 -> Ask user to install: https://nodejs.org/
 
-### Step 2: 手动安装
+### Step 2: Manual Installation
 
 ```bash
-# 进入项目根目录
-cd <项目根目录>
+# Enter project root directory
+cd <PROJECT_ROOT>
 
-# 安装依赖并编译
+# Install dependencies and build
 cd wps-office-mcp
 npm install
 rm -rf dist
 npm run build
 cd ..
 
-# 复制加载项到 WPS 目录（目录名必须以 _ 结尾）
+# Copy add-on to WPS directory (directory name must end with _)
 mkdir -p ~/.local/share/Kingsoft/wps/jsaddons
 cp -R wps-claude-assistant ~/.local/share/Kingsoft/wps/jsaddons/claude-assistant_
 
-# 创建 publish.xml
-# 注：enable="enable_dev" 为开发模式（默认）；若加载失败可改为 enable="true"（发布模式）
+# Create publish.xml
+# Note: enable="enable_dev" is development mode (default); change to enable="true" (production mode) if loading fails
 cat > ~/.local/share/Kingsoft/wps/jsaddons/publish.xml << 'EOF'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <jsplugins>
@@ -150,10 +152,10 @@ cat > ~/.local/share/Kingsoft/wps/jsaddons/publish.xml << 'EOF'
 </jsplugins>
 EOF
 
-# 注册 MCP Server
+# Register MCP Server
 claude mcp add wps-office node $(pwd)/wps-office-mcp/dist/index.js
 
-# 注册 Skills
+# Register Skills
 mkdir -p ~/.claude/skills
 ln -sf $(pwd)/skills/wps-excel ~/.claude/skills/wps-excel
 ln -sf $(pwd)/skills/wps-word ~/.claude/skills/wps-word
@@ -161,161 +163,161 @@ ln -sf $(pwd)/skills/wps-ppt ~/.claude/skills/wps-ppt
 ln -sf $(pwd)/skills/wps-office ~/.claude/skills/wps-office
 ```
 
-### Step 3: 安装后验证
+### Step 3: Post-Installation Verification
 
 ```bash
-# 1. MCP Server 已注册
+# 1. MCP Server registered
 claude mcp list
 
-# 2. Skills 已注册
+# 2. Skills registered
 ls ~/.claude/skills/
 
-# 3. 编译产物存在
+# 3. Build artifact exists
 ls wps-office-mcp/dist/index.js
 
-# 4. WPS 加载项已安装（目录名以 _ 结尾）
+# 4. WPS add-on installed (directory name ends with _)
 ls ~/.local/share/Kingsoft/wps/jsaddons/claude-assistant_/
 
-# 5. publish.xml 已注册
+# 5. publish.xml registered
 grep "claude-assistant" ~/.local/share/Kingsoft/wps/jsaddons/publish.xml
 ```
 
-### Step 4: 告知用户
+### Step 4: Inform User
 
-1. **重启 Claude Code**（必须！）
-2. 重启 WPS Office
-3. 打开任意文档，查看 "Claude助手" 选项卡
+1. **Restart Claude Code** (Mandatory!)
+2. Restart WPS Office
+3. Open any document, check "Claude Assistant" tab
 
-### ⚠️ Linux 启动顺序（重要）
+### ⚠️ Linux Startup Order (Important)
 
-Issue #17 反馈：在 Kylin Linux 等发行版上，若 WPS 已运行后再启动 Claude Code（MCP Server），WPS 进程可能异常退出。
+Issue #17 report: On certain distributions such as Kylin Linux, if WPS is already running before Claude Code (MCP Server) starts, the WPS process may terminate unexpectedly.
 
-**正确启动顺序**：
-1. 先启动 **Claude Code**（含 MCP Server 初始化）
-2. 再启动 **WPS Office**（加载项 HTTP 轮询会找到已就绪的 58891 端口）
-3. 使用 WPS MCP 工具
+**Correct startup order**:
+1. Start **Claude Code** first (initiating MCP Server)
+2. Then launch **WPS Office** (add-on HTTP polling will discover ready port 58891)
+3. Use WPS MCP tools
 
-若 WPS 已在运行，建议先 `pkill -9 wps && pkill -9 wpp && pkill -9 et`，再按上述顺序重启。
+If WPS is already running, run `pkill -9 wps && pkill -9 wpp && pkill -9 et` before following the startup order above.
 
-### Linux 关键路径参考
+### Linux Key Paths Reference
 
-| 项目 | 路径 |
+| Item | Path |
 |------|------|
-| WPS 加载项基础目录 | `~/.local/share/Kingsoft/wps/jsaddons/` |
-| 加载项安装目录 | `<基础目录>/claude-assistant_/`（尾部 `_` 必须） |
-| publish.xml | `<基础目录>/publish.xml` |
+| WPS Add-ons Base Directory | `~/.local/share/Kingsoft/wps/jsaddons/` |
+| Add-on Install Directory | `<Base Directory>/claude-assistant_/` (trailing `_` mandatory) |
+| publish.xml | `<Base Directory>/publish.xml` |
 
 ---
 
-## Windows 安装
+## Windows Installation
 
-### Step 1: 检测前置条件
+### Step 1: Check Prerequisites
 
 ```powershell
-# 检测 WPS Office 加载项目录是否存在
+# Check if WPS Office add-ons directory exists
 Test-Path "$env:APPDATA\kingsoft\wps\jsaddons"
 
-# 检测 Node.js 版本（必须 >= 18.0.0）
+# Check Node.js version (must be >= 18.0.0)
 node -v
 ```
 
-**如果前置条件不满足**：
-- WPS 加载项目录不存在 → 告知用户安装 WPS Office：https://www.wps.cn/
-- Node.js 不存在或版本 < 18 → 告知用户安装：https://nodejs.org/
-- 前置条件不满足时，停止安装流程，不要继续
+**If prerequisites are not met**:
+- WPS add-ons directory not found → Ask user to install WPS Office: https://www.wps.com/
+- Node.js not found or version < 18 → Ask user to install: https://nodejs.org/
+- Stop installation immediately if prerequisites are not met.
 
-### Step 2: 运行一键安装脚本
+### Step 2: Run One-Click Installation Script
 
 ```powershell
-# 进入项目根目录
-cd <项目根目录>
+# Enter project root directory
+cd <PROJECT_ROOT>
 
-# 执行安装脚本
+# Execute installation script
 powershell -ExecutionPolicy Bypass -File scripts/auto-install.ps1
 ```
 
-脚本自动完成以下全部操作：
-- 检测 Node.js 18+ 版本
-- 执行 `npm install` 安装依赖
-- 执行 `npm run build` 编译 TypeScript
-- 配置 Claude Code MCP（写入 `%USERPROFILE%\.claude\settings.json`）
-- 复制 Skills 到 `%USERPROFILE%\.claude\skills\`
-- 安装 WPS 加载项到 `%APPDATA%\kingsoft\wps\jsaddons\wps-claude-addon_\`（目录名尾部 `_` 是必须的）
-- 更新 publish.xml 注册加载项
+The script automatically performs all of the following operations:
+- Checks Node.js 18+ version
+- Runs `npm install` to install dependencies
+- Runs `npm run build` to compile TypeScript
+- Configures Claude Code MCP (writes to `%USERPROFILE%\.claude\settings.json`)
+- Copies Skills to `%USERPROFILE%\.claude\skills\`
+- Installs WPS add-on to `%APPDATA%\kingsoft\wps\jsaddons\wps-claude-addon_\` (trailing `_` is mandatory)
+- Updates publish.xml to register the add-on
 
-### Step 3: 安装后验证
+### Step 3: Post-Installation Verification
 
 ```powershell
-# 1. MCP Server 已注册
+# 1. MCP Server registered
 claude mcp list
 
-# 2. Skills 已注册（应列出 wps-excel, wps-word, wps-ppt, wps-office）
+# 2. Skills registered (should list wps-excel, wps-word, wps-ppt, wps-office)
 Get-ChildItem "$env:USERPROFILE\.claude\skills"
 
-# 3. 编译产物存在
+# 3. Build artifact exists
 Test-Path "wps-office-mcp\dist\index.js"
 
-# 4. WPS 加载项已安装
+# 4. WPS add-on installed
 Test-Path "$env:APPDATA\kingsoft\wps\jsaddons\wps-claude-addon_"
 
-# 5. publish.xml 已注册加载项
+# 5. publish.xml registered add-on
 Select-String -Path "$env:APPDATA\kingsoft\wps\jsaddons\publish.xml" -Pattern "wps-claude-addon"
 ```
 
-### Step 4: 告知用户
+### Step 4: Inform User
 
-安装完成后，必须告知用户：
-1. **重启 Claude Code**（必须！）
-2. 重启 WPS Office
-3. 查看 "Claude助手" 选项卡
+After installation completes, you must inform the user to:
+1. **Restart Claude Code** (Mandatory!)
+2. Restart WPS Office
+3. Check the "Claude Assistant" tab in WPS
 
 ---
 
-## 关键路径参考
+## Key Paths Reference
 
 ### macOS
 
-| 项目 | 路径 |
+| Item | Path |
 |------|------|
-| WPS 加载项基础目录 | `~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/` |
-| 加载项安装目录 | `<基础目录>/claude-assistant_/`（尾部 `_` 必须） |
-| publish.xml | `<基础目录>/publish.xml` |
-| Skills 注册目录 | `~/.claude/skills/`（4 个软链接） |
-| MCP Server 入口 | `<项目根目录>/wps-office-mcp/dist/index.js` |
-| HTTP 轮询端口 | `58891` |
+| WPS Add-on Base Directory | `~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/` |
+| Add-on Install Directory | `<Base Directory>/claude-assistant_/` (trailing `_` mandatory) |
+| publish.xml | `<Base Directory>/publish.xml` |
+| Skills Registration Directory | `~/.claude/skills/` (4 symlinks) |
+| MCP Server Entrypoint | `<PROJECT_ROOT>/wps-office-mcp/dist/index.js` |
+| HTTP Polling Port | `58891` |
 
 ### Windows
 
-| 项目 | 路径 |
+| Item | Path |
 |------|------|
-| WPS 加载项基础目录 | `%APPDATA%\kingsoft\wps\jsaddons\` |
-| 加载项安装目录 | `<基础目录>\wps-claude-addon_\`（尾部 `_` 必须） |
-| publish.xml | `<基础目录>\publish.xml` |
-| Skills 注册目录 | `%USERPROFILE%\.claude\skills\`（复制方式，非软链接） |
-| MCP Server 配置 | `%USERPROFILE%\.claude\settings.json` |
+| WPS Add-on Base Directory | `%APPDATA%\kingsoft\wps\jsaddons\` |
+| Add-on Install Directory | `<Base Directory>\wps-claude-addon_\` (trailing `_` mandatory) |
+| publish.xml | `<Base Directory>\publish.xml` |
+| Skills Registration Directory | `%USERPROFILE%\.claude\skills\` (copied, not symlinked) |
+| MCP Server Configuration | `%USERPROFILE%\.claude\settings.json` |
 
 ---
 
-## 错误处理
+## Troubleshooting & Error Handling
 
-遇到安装错误时，按以下对照表处理：
+Follow the reference table below when encountering installation errors:
 
-### npm install 失败
+### npm install fails
 
 ```bash
-# 清除缓存后重试
+# Clear cache and retry
 cd wps-office-mcp
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-如果仍失败，检查 Node.js 版本：
+If it still fails, verify Node.js version:
 ```bash
 node -v
-# 必须 >= 18.0.0，否则升级 Node.js
+# Must be >= 18.0.0, otherwise upgrade Node.js
 ```
 
-### npm run build（TypeScript 编译）失败
+### npm run build (TypeScript compilation) fails
 
 ```bash
 cd wps-office-mcp
@@ -324,21 +326,21 @@ npm install
 npm run build
 ```
 
-如果报 `tsc: command not found`，说明 typescript 未安装为依赖，检查 package.json 的 devDependencies 中是否有 typescript。
+If you see `tsc: command not found`, typescript is not installed as a dependency. Check if typescript is listed in package.json devDependencies.
 
-### MCP Server 注册失败
+### MCP Server registration fails
 
-手动注册：
+Manual registration:
 ```bash
-claude mcp add wps-office node <项目根目录的绝对路径>/wps-office-mcp/dist/index.js
+claude mcp add wps-office node <ABSOLUTE_PROJECT_PATH>/wps-office-mcp/dist/index.js
 ```
 
-注意：`<项目根目录的绝对路径>` 必须替换为实际路径，不能使用相对路径或变量。
+Note: `<ABSOLUTE_PROJECT_PATH>` must be replaced with the actual path; do not use relative paths or environment variables.
 
-### Skills 软链接创建失败
+### Skills symlink creation fails
 
 ```bash
-PROJECT_DIR=<项目根目录的绝对路径>
+PROJECT_DIR=<ABSOLUTE_PROJECT_PATH>
 mkdir -p ~/.claude/skills
 ln -sf "$PROJECT_DIR/skills/wps-excel" ~/.claude/skills/wps-excel
 ln -sf "$PROJECT_DIR/skills/wps-word" ~/.claude/skills/wps-word
@@ -346,29 +348,29 @@ ln -sf "$PROJECT_DIR/skills/wps-ppt" ~/.claude/skills/wps-ppt
 ln -sf "$PROJECT_DIR/skills/wps-office" ~/.claude/skills/wps-office
 ```
 
-验证：
+Verification:
 ```bash
 ls -la ~/.claude/skills/
-# 应看到 4 个软链接，指向项目中的 skills/ 子目录
+# Should display 4 symlinks pointing to skills/ subdirectories in the project
 ```
 
-### WPS 加载项未显示 "Claude助手" 选项卡
+### WPS add-on does not show "Claude Assistant" tab
 
-1. 确认加载项目录已正确复制且名称以 `_` 结尾：
+1. Confirm add-on directory was copied correctly and ends with `_`:
 ```bash
 # macOS
 ls ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/claude-assistant_/
-# 应包含 main.js, manifest.xml, ribbon.xml 等文件
+# Should contain main.js, manifest.xml, ribbon.xml, etc.
 ```
 
-2. 确认 publish.xml 包含注册条目：
+2. Confirm publish.xml contains registration entry:
 ```bash
 # macOS
 cat ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/publish.xml
-# 应包含 <jsplugin name="claude-assistant" .../> 条目
+# Should contain <jsplugin name="claude-assistant" .../>
 ```
 
-3. 强制退出并重启 WPS：
+3. Force quit and restart WPS:
 ```bash
 # macOS
 pkill -f wpsoffice
@@ -376,48 +378,48 @@ sleep 2
 open /Applications/wpsoffice.app
 ```
 
-### HTTP 轮询端口 58891 被占用（macOS）
+### HTTP polling port 58891 in use (macOS)
 
 ```bash
-# 查看端口占用
+# Check port usage
 lsof -i :58891
 
-# 终止占用进程
+# Terminate process occupying port
 kill <PID>
 ```
 
-### macOS 加载项目录权限不足
+### macOS add-on directory permissions error
 
 ```bash
-# 手动创建目录
+# Manually create directory
 mkdir -p ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons
 
-# 修复权限
+# Fix permissions
 chmod -R 755 ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons
 ```
 
 ---
 
-## 已知问题与故障排除（GitHub Issues）
+## Known Issues (GitHub Issues)
 
-### Issue #6: MCP 连接失败（"Failed to connect"）
+### Issue #6: MCP Connection Failed ("Failed to connect")
 
-**现象**：`claude mcp list` 显示 `wps-office: Failed to connect`。
+**Symptom**: `claude mcp list` shows `wps-office: Failed to connect`.
 
-**根因**：dist 目录中的编译产物过期，存在工具名称重复注册导致 MCP Server 启动即崩溃。
+**Root cause**: Outdated build artifacts in dist directory where duplicate tool name registrations cause the MCP Server to crash on startup.
 
-**解决方案**：
+**Resolution**:
 ```bash
 cd wps-office-mcp
-# 清除旧编译产物后重新编译（关键步骤！）
+# Clean old build artifacts and recompile (critical step!)
 rm -rf dist
 npm run build
-# 验证启动是否正常（应看到 "Server started successfully"）
+# Verify server starts cleanly (should see "Server started successfully")
 node dist/index.js 2>&1 | head -5
-# Ctrl+C 退出
+# Press Ctrl+C to exit
 ```
 
-如果仍然失败，完整重建：
+If it still fails, complete clean rebuild:
 ```bash
 cd wps-office-mcp
 rm -rf dist node_modules
@@ -425,30 +427,30 @@ npm install
 npm run build
 ```
 
-然后重新注册 MCP：
+Then re-register MCP:
 ```bash
 claude mcp remove wps-office
-claude mcp add wps-office node <项目绝对路径>/wps-office-mcp/dist/index.js
+claude mcp add wps-office node <ABSOLUTE_PROJECT_PATH>/wps-office-mcp/dist/index.js
 ```
 
-### Issue #5: Linux 平台 WPS 找不到加载项
+### Issue #5: WPS cannot find add-on on Linux
 
-**现象**：Linux（如 ArchLinux）安装成功但 WPS 中看不到 Claude 助手选项卡。
+**Symptom**: Add-on installs successfully on Linux (e.g. Arch Linux), but the Claude Assistant tab does not appear in WPS.
 
-**根因**：安装脚本中 Linux 加载项目录名缺少尾部 `_` 后缀，且未更新 publish.xml。WPS jsaddons 规范要求目录名以 `_` 结尾才能被识别。
+**Root cause**: Installation script lacked trailing `_` suffix on the Linux add-on directory, and publish.xml was missing. WPS jsaddons specification requires the directory name to end with `_` to be recognized.
 
-**解决方案**：
+**Resolution**:
 ```bash
-# 1. 检查当前安装路径（错误的旧路径）
+# 1. Check current install path (incorrect old path)
 ls ~/.local/share/Kingsoft/wps/jsaddons/wps-claude-addon 2>/dev/null
 
-# 2. 如果存在旧目录，删除并重新安装
+# 2. If old directory exists, remove it
 rm -rf ~/.local/share/Kingsoft/wps/jsaddons/wps-claude-addon
 
-# 3. 手动复制到正确路径（目录名必须以 _ 结尾）
-cp -R <项目根目录>/wps-claude-assistant ~/.local/share/Kingsoft/wps/jsaddons/claude-assistant_
+# 3. Copy manually to correct path (directory name MUST end with _)
+cp -R <PROJECT_ROOT>/wps-claude-assistant ~/.local/share/Kingsoft/wps/jsaddons/claude-assistant_
 
-# 4. 创建 publish.xml（Linux 上也需要）
+# 4. Create publish.xml (also required on Linux)
 cat > ~/.local/share/Kingsoft/wps/jsaddons/publish.xml << 'EOF'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <jsplugins>
@@ -456,48 +458,48 @@ cat > ~/.local/share/Kingsoft/wps/jsaddons/publish.xml << 'EOF'
 </jsplugins>
 EOF
 
-# 5. 重启 WPS
+# 5. Restart WPS
 pkill -f wps
-# 然后重新打开 WPS
+# Then reopen WPS
 ```
 
-**注意**：不同 Linux 发行版 WPS 加载项目录可能不同。已知路径：
-- 通用：`~/.local/share/Kingsoft/wps/jsaddons/`
-- 部分发行版：`~/.kingsoft/wps/jsaddons/`
+**Note**: Add-on directories may vary across Linux distributions. Common paths:
+- Standard: `~/.local/share/Kingsoft/wps/jsaddons/`
+- Some distros: `~/.kingsoft/wps/jsaddons/`
 
-如果以上路径都不生效，可通过以下方式查找：
+If neither works, search for the directory:
 ```bash
 find / -path "*/Kingsoft/wps/jsaddons" -type d 2>/dev/null
 find / -path "*kingsoft/wps/jsaddons" -type d 2>/dev/null
 ```
 
-### Issue #4: WPS 加载项启动报 "arguments error"
+### Issue #4: WPS Add-on startup error "arguments error"
 
-**现象**：WPS 弹出 `ERROR: arguments error at <anonymous>:1:89`。
+**Symptom**: WPS displays popup `ERROR: arguments error at <anonymous>:1:89`.
 
-**根因**：manifest.xml 中缺少 `<ribbon>` 和 `<scripts>` 标签声明，导致 WPS 无法正确解析加载项入口。
+**Root cause**: Missing `<ribbon>` and `<scripts>` tag declarations in manifest.xml, causing WPS to fail resolving the add-on entrypoint.
 
-**解决方案**：
+**Resolution**:
 
-已修复 `wps-claude-assistant/manifest.xml`，确保包含完整的 ribbon 和 scripts 声明。如果仍遇到此错误：
+`wps-claude-assistant/manifest.xml` has been patched with complete ribbon and scripts declarations. If you still encounter this error:
 
 ```bash
-# 1. 检查 manifest.xml 是否包含 ribbon 和 scripts 声明
-grep -E "ribbon|scripts" <加载项安装目录>/manifest.xml
-# 应看到类似：
+# 1. Check if manifest.xml has ribbon and scripts declarations
+grep -E "ribbon|scripts" <ADDON_INSTALL_DIR>/manifest.xml
+# You should see:
 #   <ribbon src="ribbon.xml"/>
 #   <script src="main.js"/>
 
-# 2. 确认 ribbon.xml 和 main.js 文件存在
-ls <加载项安装目录>/ribbon.xml
-ls <加载项安装目录>/main.js
+# 2. Confirm ribbon.xml and main.js exist
+ls <ADDON_INSTALL_DIR>/ribbon.xml
+ls <ADDON_INSTALL_DIR>/main.js
 
-# 3. 重新复制加载项（使用最新版本）
+# 3. Re-copy add-on using the latest version
 # macOS:
 rm -rf ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/claude-assistant_
-cp -R <项目根目录>/wps-claude-assistant ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/claude-assistant_
+cp -R <PROJECT_ROOT>/wps-claude-assistant ~/Library/Containers/com.kingsoft.wpsoffice.mac/Data/.kingsoft/wps/jsaddons/claude-assistant_
 
-# 4. 重启 WPS
+# 4. Restart WPS
 pkill -f wpsoffice
 sleep 2
 open /Applications/wpsoffice.app

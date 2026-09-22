@@ -1,36 +1,38 @@
 # WPS Skills
 
-> 此项目的任何功能、架构更新，必须在结束后同步更新相关文档。这是我们契约的一部分。
+[English](README.md) | [Tiếng Việt](README_vi.md) | [中文](README_zh.md)
 
-AI编程助手通过自然语言操控WPS Office的MCP工具集。
+> Any functional or architectural updates to this project must be synchronized with the relevant documentation upon completion. This is part of our contract.
 
-## 项目定位
+An MCP toolset for AI coding assistants to control WPS Office via natural language.
 
-本项目是MCP Server + Skills框架，让AI助手（Claude Code/Cursor/Augment等）能操控WPS Office。
-- 231个MCP专业工具 + 12个内置工具 = 243个
-- 支持Excel(82工具) / Word(28工具) / PPT(112工具) / 通用(9工具)
-- 支持macOS、Windows、Linux
+## Project Scope
 
-## 前提条件
+This project provides an MCP Server + Skills framework enabling AI assistants (Claude Code, Cursor, Augment, Codex CLI, Windsurf, etc.) to control WPS Office.
+- 231 professional MCP tools + 12 built-in tools = 243 tools in total
+- Supports Excel (82 tools) / Word (28 tools) / PPT (112 tools) / Common (9 tools)
+- Supports macOS, Windows, and Linux
 
-- 已安装 WPS Office（https://www.wps.cn/ 或 https://www.wps.com/）
+## Prerequisites
+
+- WPS Office installed ([https://www.wps.com/](https://www.wps.com/) or [https://www.wps.cn/](https://www.wps.cn/))
 - Node.js >= 18.0.0
 - Git
 
-## 自动安装（AI执行）
+## Automated Installation (AI Execution)
 
-以下步骤由AI助手自动执行。需要人类交互的步骤标注 ⚠️。
+The following steps are designed to be executed automatically by AI assistants. Steps requiring human interaction are marked with ⚠️.
 
-### 步骤1: 克隆项目
+### Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/lc2panda/wps-skills.git
 cd wps-skills
 ```
 
-如果项目已存在，跳过此步。
+If the project is already cloned, skip this step.
 
-### 步骤2: 安装依赖并编译
+### Step 2: Install Dependencies and Build
 
 ```bash
 cd wps-office-mcp
@@ -39,47 +41,47 @@ npm run build
 cd ..
 ```
 
-### 步骤3: 配置MCP Server
+### Step 3: Configure MCP Server
 
-根据使用的AI工具，将以下配置写入对应文件。注意将路径替换为实际的项目绝对路径。
+Add the following configuration to the appropriate configuration file for your AI tool. Replace the path with the actual absolute path to your project.
 
-**Claude Code** — 写入 `~/.claude/settings.json`：
+**Claude Code** — add to `~/.claude/settings.json`:
 ```json
 {
   "mcpServers": {
     "wps-office": {
       "command": "node",
-      "args": ["/你的路径/wps-skills/wps-office-mcp/dist/index.js"]
+      "args": ["/YOUR_PATH/wps-skills/wps-office-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-**Cursor** — 写入项目根目录 `.cursor/mcp.json`：
+**Cursor** — add to project root `.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
     "wps-office": {
       "command": "node",
-      "args": ["/你的路径/wps-skills/wps-office-mcp/dist/index.js"]
+      "args": ["/YOUR_PATH/wps-skills/wps-office-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-**OpenAI Codex CLI** — 写入 `~/.codex/config.toml`：
+**OpenAI Codex CLI** — add to `~/.codex/config.toml`:
 ```toml
 [mcp_servers.wps-office]
 command = "node"
-args = ["/你的路径/wps-skills/wps-office-mcp/dist/index.js"]
+args = ["/YOUR_PATH/wps-skills/wps-office-mcp/dist/index.js"]
 ```
-或命令行注册：`codex mcp add wps-office -- node /你的路径/wps-skills/wps-office-mcp/dist/index.js`
+Or register via CLI: `codex mcp add wps-office -- node /YOUR_PATH/wps-skills/wps-office-mcp/dist/index.js`
 
-**Augment / 其他MCP兼容IDE** — 参考各IDE的MCP Server配置文档，使用相同的command和args。本项目 MCP Server 为标准 stdio 实现（spec 2025-11-25），与所有 MCP 一等客户端（Claude Code / Cursor / Codex CLI / GitHub Copilot CLI / Windsurf 等）兼容。
+**Augment / Other MCP-compatible IDEs** — Refer to your IDE's MCP Server configuration guide using the same command and args. This MCP Server is a standard stdio implementation (spec 2025-11-25) compatible with all MCP first-class clients (Claude Code, Cursor, Codex CLI, GitHub Copilot CLI, Windsurf, etc.).
 
-### 步骤4: 安装WPS加载项
+### Step 4: Install WPS Add-on
 
-⚠️ 需要人工操作（AI无法直接操作WPS应用）：
+⚠️ Requires manual execution (AI cannot directly control WPS UI application):
 
 ```bash
 # macOS
@@ -92,62 +94,62 @@ powershell scripts/install.ps1
 bash scripts/install.sh
 ```
 
-⚠️ 安装后必须重启WPS Office才能生效。
+⚠️ You must restart WPS Office after installation for the add-on to take effect.
 
-### 步骤5: 安装Skills（仅Claude Code需要）
+### Step 5: Install Skills (Required for Claude Code only)
 
 ```bash
-# 创建skills目录（如不存在）
+# Create skills directory if it does not exist
 mkdir -p ~/.claude/skills
 
-# 创建符号链接
+# Create symbolic links
 ln -sf "$(pwd)/skills/wps-excel" ~/.claude/skills/wps-excel
 ln -sf "$(pwd)/skills/wps-word" ~/.claude/skills/wps-word
 ln -sf "$(pwd)/skills/wps-ppt" ~/.claude/skills/wps-ppt
 ln -sf "$(pwd)/skills/wps-office" ~/.claude/skills/wps-office
 ```
 
-### 步骤6: 验证安装
+### Step 6: Verify Installation
 
 ```bash
-# 验证MCP Server可启动
+# Verify MCP Server can start
 node wps-office-mcp/dist/index.js &
-# 应看到 "MCP Server started successfully" 日志
+# You should see the "MCP Server started successfully" log
 kill %1 2>/dev/null
 ```
 
-## 架构
+## Architecture
 
 ```
-Skills层(SKILL.md自然语言指导)
-  ↓ Claude Code调用
-MCP Server层(239个工具)
+Skills Layer (SKILL.md natural language guidance)
+  ↓ Invoked by Claude Code
+MCP Server Layer (239 tools)
   ↓ wpsClient.executeMethod()
-执行层
-  ├── macOS: wps-claude-assistant (227 action, HTTP轮询)
-  └── Windows: wps-com.ps1 (231 action, COM接口)
+Execution Layer
+  ├── macOS: wps-claude-assistant (227 actions, HTTP polling)
+  └── Windows: wps-com.ps1 (231 actions, COM interface)
 ```
 
-## 工具清单
+## Tool Inventory
 
-| 应用 | 工具数 | 主要能力 |
-|------|--------|---------|
-| Excel | 82 | 公式/数据/图表/透视表/工作表/格式/工作簿/行列/批注保护/图片导出 |
-| Word | 28 | 格式/内容/文档管理/页眉页脚/批注/模板填写/段落结构 |
-| PPT | 112 | 幻灯片/形状/图片/表格/美化/动画/图表/3D/数据可视化/图片导出 |
-| 通用 | 9 | 保存/连接检测/文本选取/格式转换 |
-| 内置 | 12 | 连接检查/万能方法调用/数据缓存 |
+| Application | Tool Count | Primary Capabilities |
+|-------------|------------|----------------------|
+| Excel | 82 | Formulas / Data manipulation / Charts / Pivot tables / Worksheets / Formatting / Workbooks / Rows & columns / Comments & protection / Image export |
+| Word | 28 | Formatting / Content editing / Document management / Headers & footers / Comments / Template filling / Paragraph structure |
+| PPT | 112 | Slides / Shapes / Images / Tables / Design & beautify / Animations / Charts / 3D / Data visualization / Image export |
+| Common | 9 | File saving / Connection detection / Text selection / Format conversion |
+| Built-in | 12 | Connection check / Universal method call / Data caching |
 
-## 故障排除
+## Troubleshooting
 
-| 问题 | 解决方案 |
-|------|---------|
-| MCP连接失败 | 确认 `npm install && npm run build` 已执行，检查dist/index.js存在 |
-| WPS未响应 | 重启WPS Office，确认加载项已安装 |
-| "arguments error" | 重新运行安装脚本，重启WPS |
-| Linux找不到插件 | 查看INSTALL.md中的Linux专用指南 |
-| 工具调用返回null | 确认WPS中已打开对应类型的文档 |
+| Issue | Solution |
+|-------|----------|
+| MCP connection failed | Ensure `npm install && npm run build` has been executed; verify `dist/index.js` exists. |
+| WPS not responding | Restart WPS Office; confirm the add-on is installed. |
+| "arguments error" | Re-run the installation script and restart WPS. |
+| Plugin not found on Linux | See the Linux-specific section in [INSTALL.md](INSTALL.md). |
+| Tool invocation returns null | Confirm a document of the corresponding type is open in WPS Office. |
 
-## 许可证
+## License
 
 MIT

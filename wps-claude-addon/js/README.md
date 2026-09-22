@@ -1,3 +1,2 @@
 main.js
-Windows WPS 加载项脚本实现目录。
-一旦这里的结构发生变化，请务必更新我... 就像重新标记领地一样。
+Windows WPS add-on frontend logic implementation. / Thực thi logic frontend của add-on WPS trên Windows.

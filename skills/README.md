@@ -1,3 +1,10 @@
-wps-excel/, wps-word/, wps-ppt/, wps-office/
-Claude Skills 定义与使用说明的集合目录。
-一旦这里的结构发生变化，请务必更新我... 就像重新标记领地一样。
+# WPS Skills Directory
+
+`wps-excel/`, `wps-word/`, `wps-ppt/`, `wps-office/`
+
+Claude Skills definitions and usage instructions collection.
+Collection of prompt guides and instructions for Claude Code and AI assistants.
+
+---
+
+Thư mục tập hợp các định nghĩa và hướng dẫn sử dụng Claude Skills cho Excel, Word, PPT và Office tổng hợp.

@@ -1,3 +1,2 @@
-error.ts, logger.ts
-MCP 服务端通用工具与日志目录。
-一旦这里的结构发生变化，请务必更新我... 就像重新标记领地一样。
+logger.ts, errors.ts
+MCP server common utility functions directory. / Thư mục các hàm tiện ích cho MCP Server.

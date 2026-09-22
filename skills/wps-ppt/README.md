@@ -1,3 +1,6 @@
-SKILL.md
-PPT 技能指令与流程说明文件。
-一旦这里的结构发生变化，请务必更新我... 就像重新标记领地一样。
+# wps-ppt Skill
+
+`SKILL.md` (English) | `SKILL_vi.md` (Tiếng Việt) | `SKILL_zh.md` (中文)
+
+WPS Presentation AI Skill instructions, workflow guidelines, aesthetic principles, and MCP tool references.
+Hướng dẫn kỹ năng AI cho WPS Trình chiếu (PowerPoint / Presentation), quy trình thực thi, nguyên tắc thẩm mỹ và danh mục công cụ MCP.
